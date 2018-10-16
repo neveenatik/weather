@@ -93,13 +93,17 @@ curl.getJSON(UK_LOCATIONS_API, null, (err, response, data) => {
     }`
   );
   if (response.statusCode === 200) {
-    const locations = data.Locations.Location.map(location => location.name);
+    const locations = [];
+    data.Locations.Location.sort((a, b) => b.latitude - a.latitude);
+    for (let i = 0; i < data.Locations.Location.length; i + config.chunk) {
+      locations.push(data.Locations.Location[i]);
+      console.error("Line 105: Requesting weather data based on locations' id");
+      requestWeatherData(data.Locations.Location[i].id);
+    }
     writeFile("UK-6001-LocationNames.json", locations);
-    writeFile("UK-LocationDetails.json", data);
-    console.log("Line 110: Requesting weather data based on locations' id");
-    data.Locations.Location.map(location => requestWeatherData(location.id));
+    // chunkedLocation.forEach(location => requestWeatherData(location.id));
   } else if (err) {
-    console.log(err);
+    console.error(err);
   }
 });
 
